@@ -16,27 +16,16 @@ import { useSelector, useDispatch } from "react-redux";
 import { register, reset } from "../features/auth/authSlice";
 import { toast } from "react-toastify";
 import OtpTimer from "otp-timer";
-// import OtpInput from "react-otp-input";
 import OTPInput, { ResendOTP } from "otp-input-react";
+
+import { GoogleLogin } from "@react-oauth/google";
+import jwt_decode from "jwt-decode";
 
 import axios from "axios";
 import swal from "sweetalert";
 
 const validate = async (values) => {
   const errors = {};
-
-  // const alredyExist = await axios.get("/api/auth/checkEmail", {
-  //   email: values.email,
-  //   name: values.name,
-  // });
-
-  // if (alredyExist.data == "mailExist") {
-  //   errors.email = "This Email already Exist!, Try Another";
-  // }
-  // if (alredyExist.data == "nameExist") {
-  //   errors.name = "This User Name already Exist!, Try Another";
-  // }
-
   if (!values.name) {
     errors.name = "Required";
   } else if (values.name.length > 15) {
@@ -74,20 +63,49 @@ const StyledModal = styled(Modal)({
 });
 function Signup() {
   const [open, setOpen] = useState(false);
-
   const [userData, setUserData] = useState({});
-
   const [OTP, setOTP] = useState("");
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { user, isLoading, isError, isSuccess, message } = useSelector(
+    (state) => state.auth
+  );
 
-  // const handleChange = (otp) => setOtp({ otp });
+  useEffect(() => {
+    if (isError) {
+      toast.error(message);
+    }
+    if (isSuccess || user) {
+      console.log("go to home ");
+      navigate("/userHome");
+    }
+    dispatch(reset());
+  }, [user, isError, isSuccess, message, navigate, dispatch]);
 
+  const GoogleAuthSignup = async (decoded) => {
+    const userData = {
+      name: decoded.name,
+      email: decoded.email,
+      password: decoded.sub,
+    };
+    const alredyExist = await axios.post("/api/auth/checkEmail", {
+      email: decoded.email,
+      name: decoded.name,
+    });
+    if (alredyExist.data == "emailExist") {
+      console.log("Email exist");
+      toast.error("This Email already Exist!, Try Another");
+    } else if (alredyExist.data == "nameExist") {
+      console.log("nmae exist");
+      toast.error("This Name already Exist!, Try Another");
+    } else {
+      dispatch(register(userData));
+    }
+  };
   const validateOtp = async (e) => {
     e.preventDefault();
-    console.log(userData);
-    console.log(OTP.length);
     if (OTP.length === 4) {
       console.log(userData);
-      // console.log(userData.phone);
       const inOtpData = await axios.post("/api/auth/otpConfirmation", {
         phone: userData.phone,
         otp: OTP,
@@ -106,12 +124,6 @@ function Signup() {
   const handleResend = async () => {
     console.log("resend otp");
   };
-
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const { user, isLoading, isError, isSuccess, message } = useSelector(
-    (state) => state.auth
-  );
   const formik = useFormik({
     initialValues: {
       name: "",
@@ -148,18 +160,6 @@ function Signup() {
       }
     },
   });
-  useEffect(() => {
-    console.log("use effect");
-    if (isError) {
-      toast.error(message);
-    }
-    if (isSuccess || user) {
-      console.log("go to home ");
-      navigate("/userHome");
-    }
-    dispatch(reset());
-  }, [user, isError, isSuccess, message, navigate, dispatch]);
-
   return (
     <div>
       <form onSubmit={formik.handleSubmit}>
@@ -181,8 +181,10 @@ function Signup() {
           }}
         >
           <Typography
-            variant="h4"
-            sx={{ color: "#1876d2" }}
+            sx={{
+              color: "#1876d2",
+              fontSize: { xs: "22px", sm: "25px", md: "30px" },
+            }}
             padding={1}
             textAlign="center"
           >
@@ -196,30 +198,28 @@ function Signup() {
             fontWeight={400}
             sx={{
               display: { xs: "none", sm: "block" },
+              mb:2,
               color: "gray",
               fontWeight: "350",
             }}
           >
             Sign up to see photos and videos from your friends.
           </Typography>
-          <Button
-            margin="normal"
-            variant="outlined"
-            sx={{
-              color: "#fff",
-              width: { sm: 200, md: 300 },
-              "& .MuiInputBase-root": {
-                height: 43,
-              },
-              "&:hover": {
-                backgroundColor: "#fff",
-                color: "#3c52b2",
-              },
-              bgcolor: "#1876d2",
+
+          <GoogleLogin
+            width="large"
+            theme="outline"
+            onSuccess={(credentialResponse) => {
+              const decoded = jwt_decode(credentialResponse.credential);
+              console.log(decoded);
+              GoogleAuthSignup(decoded);
+              console.log(credentialResponse);
             }}
-          >
-            <GoogleIcon sx={{ fontSize: 27, mr: 2 }} /> Sign up with Google
-          </Button>
+            onError={() => {
+              console.log("Login Failed");
+            }}
+          />
+
           <Divider
             sx={{
               width: { sm: 200, md: 300 },

@@ -14,16 +14,13 @@ export const register = createAsyncThunk(
   async (userData, thunkAPI) => {
     try {
       const response = await axios.post("/api/auth/register", userData);
-
       if (response.data) {
         localStorage.setItem("user", JSON.stringify(response.data));
       }
       return response.data;
     } catch (error) {
       const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data) ||
+        (error.response && error.response.data && error.response.data) ||
         error.message ||
         error.toString();
       return thunkAPI.rejectWithValue(message);
@@ -42,29 +39,31 @@ export const login = createAsyncThunk(
       return response.data;
     } catch (error) {
       const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data) ||
+        (error.response && error.response.data && error.response.data) ||
         error.message ||
         error.toString();
       return thunkAPI.rejectWithValue(message);
     }
   }
 );
-export  const logout =createAsyncThunk('Auth/logout',async () =>{
-  await  localStorage.removeItem('user')
-})
-// export const logout = createAsyncThunk("auth/logout", async (_, thunkAPI) => {
-//   try {
-//      await localStorage.removeItem("user");
-//   } catch (error) {
-//     const message =
-//       (error.response && error.response.data && error.response.data.message) ||
-//       error.message ||
-//       error.toString();
-//     return thunkAPI.rejectWithValue(message);
-//   }
-// });
+export const logout = createAsyncThunk(
+  "Auth/logout",
+  async (data, { rejectWithValue, getState, dispatch }) => {
+    
+    try {
+      const { token } = JSON.parse(localStorage.getItem("user"));
+      const config = {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      };
+      const { data } = await axios.get("/api/auth/logout",config);
+      if (data.status) localStorage.removeItem("user");
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
 
 export const authSlice = createSlice({
   name: "auth",

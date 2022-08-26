@@ -2,6 +2,7 @@ const router = require("express").Router();
 const User = require("../model/User");
 const bycrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+
 require("dotenv").config();
 const ServiceSID = process.env.ServiceSID;
 const AccountSID = process.env.AccountSID;
@@ -28,7 +29,6 @@ const checkEmail = async (req, res) => {
     res.status(200).json("noUser");
     }
   } catch (error) {
-    console.log("WQWQWQWQWQWQWWWWWWWWWWWWWWWQQQQQQ");
     res.status(500).json(error);
   }
 };
@@ -40,7 +40,6 @@ const otpValidation = async (req, res) => {
       channel: "sms",
     });
     console.log('otp send');
-
     res.status(200).json("success");
   } catch (err) {
     console.log("eroor");
@@ -139,11 +138,42 @@ const generateToken = (id) => {
     expiresIn: "30d",
   });
 };
+const checkPhoneNum = async (req, res) => {
+  try {
+    // check exsting user
+    console.log(req.body.phone);
 
+    const exstingPhone = await User.findOne({ phone: req.body.phone });
+    
+    if (exstingPhone) {
+      console.log("exist Phone");
+      client.verify.services(ServiceSID).verifications.create({
+        to: `+91${req.body.phone}`,
+        channel: "sms",
+      });
+      console.log('otp send');
+      res.status(200).json("phoneConfirmed");
+    } else {
+    res.status(200).json("noPhone");
+    }
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
+// logout the user
+const logout = async (req, res) => {
+  try {
+    res.status(200).json({status: true});
+  } catch (error) {
+    res.status(500).json({status: false}); 
+  }
+}
 module.exports = {
   register,
   login,
   otpValidation,
   otpConfirmation,
   checkEmail,
+  checkPhoneNum,
+  logout
 };

@@ -76,7 +76,6 @@ const Navbar = () => {
           <Avatar sx={{width:30,height:30, }} src="https://avatars.githubusercontent.com/u/102403834?v=4" 
           onClick={e=>{setOpen(true)}}
           />
-
         </Icons>
         <Userbox onClick={e=>{setOpen(true)}}>
         <Avatar sx={{width:30,height:30, }} src="https://avatars.githubusercontent.com/u/102403834?v=4" 
