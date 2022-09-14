@@ -17,7 +17,6 @@ import { register, reset } from "../features/auth/authSlice";
 import { toast } from "react-toastify";
 import OtpTimer from "otp-timer";
 import OTPInput, { ResendOTP } from "otp-input-react";
-
 import { GoogleLogin } from "@react-oauth/google";
 import jwt_decode from "jwt-decode";
 
@@ -88,19 +87,27 @@ function Signup() {
       email: decoded.email,
       password: decoded.sub,
     };
-    const alredyExist = await axios.post("/api/auth/checkEmail", {
-      email: decoded.email,
-      name: decoded.name,
-    });
-    if (alredyExist.data == "emailExist") {
-      console.log("Email exist");
-      toast.error("This Email already Exist!, Try Another");
-    } else if (alredyExist.data == "nameExist") {
-      console.log("nmae exist");
-      toast.error("This Name already Exist!, Try Another");
-    } else {
-      dispatch(register(userData));
+    
+    try {
+      const alredyExist = await axios.post("/api/auth/checkEmail", {
+        email: decoded.email,
+        name: decoded.name,
+      });
+      if (alredyExist.data == "noUser") {
+        dispatch(register(userData));
+      }
+    } catch (error) {
+      if (error.response.data == "emailExist") {
+        console.log("Email exist");
+        toast.error("This Email already Exist!, Try Another");
+      } else if (error.response.data == "nameExist") {
+        console.log("nmae exist");
+        toast.error("This Name already Exist!, Try Another");
+      } else {
+        console.log(error)
+      }
     }
+   
   };
   const validateOtp = async (e) => {
     e.preventDefault();
@@ -137,10 +144,35 @@ function Signup() {
       // console.log(values);
       setUserData(values);
       console.log(values.email, values.name);
-      const alredyExist = await axios.post("/api/auth/checkEmail", {
-        email: values.email,
-        name: values.name,
-      });
+      try {
+        const alredyExist = await axios.post("/api/auth/checkEmail", {
+          email: values.email,
+          name: values.name,
+        });
+        if (alredyExist.data == "noUser") {
+          const phone = values.phone;
+          const otpData = await axios.post("/api/auth/otpValidation", {
+            phone: phone,
+          });
+          if (otpData.data == "success") {
+            setOpen(true);
+          } else {
+            console.log("otp error from backend");
+          }
+        }
+      } catch (error) {
+        if (error.response.data == "emailExist") {
+          console.log("Email exist");
+          toast.error("This Email already Exist!, Try Another");
+        } else if (error.response.data == "nameExist") {
+          console.log("nmae exist");
+          toast.error("This Name already Exist!, Try Another");
+        } else {
+          console.log(error)
+        }
+      }
+
+
       if (alredyExist.data == "emailExist") {
         console.log("Email exist");
         toast.error("This Email already Exist!, Try Another");
@@ -148,15 +180,7 @@ function Signup() {
         console.log("nmae exist");
         toast.error("This Name already Exist!, Try Another");
       } else {
-        const phone = values.phone;
-        const otpData = await axios.post("/api/auth/otpValidation", {
-          phone: phone,
-        });
-        if (otpData.data == "success") {
-          setOpen(true);
-        } else {
-          console.log("otp error from backend");
-        }
+        
       }
     },
   });

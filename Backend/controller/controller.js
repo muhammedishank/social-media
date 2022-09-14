@@ -20,11 +20,11 @@ const checkEmail = async (req, res) => {
     // console.log(exstingMail);
     if (exstingMail) {
       console.log("exist email");
-      res.status(200).json("emailExist");
+      res.status(400).json("emailExist");
     }
     else if (exstingName) {
       console.log("exist name");
-      res.status(200).json("nameExist");
+      res.status(400).json("nameExist");
     } else {
     res.status(200).json("noUser");
     }
@@ -42,17 +42,13 @@ const otpValidation = async (req, res) => {
     console.log('otp send');
     res.status(200).json("success");
   } catch (err) {
-    console.log("eroor");
     res.status(500).json(err);
   }
 };
 
 const otpConfirmation = async (req, res) => {
   try {
-    console.log("confirm");
-    // console.log(req.body);
-    console.log(req.body.phone, req.body.otp);
-
+  
     client.verify
       .services(ServiceSID)
       .verificationChecks.create({
@@ -66,7 +62,7 @@ const otpConfirmation = async (req, res) => {
           res.status(200).json("otpConfirmed");
         } else {
           console.log("otp failed");
-          res.status(500).json("confirmation failed");
+          res.status(400).json("confirmationFailed");
         }
       });
   } catch (err) {
@@ -113,8 +109,6 @@ const login = async (req, res) => {
     if (!user) {
       return res.status(404).json("user not found");
     }
-    //   !user && res.status(404).json("user not found");
-
     const validPassword = await bycrypt.compare(
       req.body.password,
       user.password
@@ -122,7 +116,6 @@ const login = async (req, res) => {
     if (!validPassword) {
       return res.status(404).json("Wrong password");
     }
-
     res.status(200).json({
       _id: user._id,
       name: user.username,
@@ -130,9 +123,27 @@ const login = async (req, res) => {
       token: generateToken(user._id),
     });
   } catch (err) {
-     
+   console.log(err) 
   }
 };
+// forgottPassword
+const forgottPassword = async (req, res) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) {
+      return res.status(404).json("User not Found!");
+    }
+    const salt = await bycrypt.genSalt(10);
+    const password = await bycrypt.hash(req.body.password, salt);
+    const forgottPassword = await User.findOneAndUpdate({email: req.body.email}, {$set:{password:password}})
+    console.log(forgottPassword,'updated password')
+    const SaveUser = await forgottPassword.save();
+    // console.log(SaveUser);
+    res.status(200).json("updated password")
+  } catch (error) { 
+    console.log(error);
+  }
+}
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: "30d",
@@ -141,8 +152,7 @@ const generateToken = (id) => {
 const checkPhoneNum = async (req, res) => {
   try {
     // check exsting user
-    console.log(req.body.phone);
-
+    console.log(req.body.phone)
     const exstingPhone = await User.findOne({ phone: req.body.phone });
     
     if (exstingPhone) {
@@ -154,7 +164,8 @@ const checkPhoneNum = async (req, res) => {
       console.log('otp send');
       res.status(200).json("phoneConfirmed");
     } else {
-    res.status(200).json("noPhone");
+      console.log("no phone matched")
+    res.status(400).json("noPhone");
     }
   } catch (error) {
     res.status(500).json(error);
@@ -175,5 +186,6 @@ module.exports = {
   otpConfirmation,
   checkEmail,
   checkPhoneNum,
-  logout
+  logout,
+  forgottPassword
 };

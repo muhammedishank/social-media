@@ -32,7 +32,6 @@ export const login = createAsyncThunk(
   async (userData, thunkAPI) => {
     try {
       const response = await axios.post("/api/auth/login", userData);
-
       if (response.data) {
         localStorage.setItem("user", JSON.stringify(response.data));
       }
@@ -46,10 +45,30 @@ export const login = createAsyncThunk(
     }
   }
 );
+export const forgottPassword = createAsyncThunk(
+  "auth/forgottPassword",
+  async (userData, thunkAPI) => {
+    try {
+      console.log("favas")
+      const response = await axios.put("/api/auth/forgottPassword", userData);
+      console.log(response)
+      // if (response.data) {
+      //   localStorage.setItem("us", JSON.stringify(response.data));
+      // }
+      return response.data;
+    } catch (error) {
+      console.log(error)
+      const message =
+        (error.response && error.response.data && error.response.data) ||
+        error.message ||
+        error.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
 export const logout = createAsyncThunk(
   "Auth/logout",
   async (data, { rejectWithValue, getState, dispatch }) => {
-    
     try {
       const { token } = JSON.parse(localStorage.getItem("user"));
       const config = {
@@ -102,6 +121,20 @@ export const authSlice = createSlice({
         state.user = action.payload;
       })
       .addCase(login.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload;
+        state.user = null;
+      })
+      .addCase(forgottPassword.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(forgottPassword.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.forgot = action.payload;
+      })
+      .addCase(forgottPassword.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
         state.message = action.payload;

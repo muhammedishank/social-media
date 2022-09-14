@@ -31,16 +31,20 @@ const forgott = ({ open, setOpen }) => {
     if (num[0].length != 10) {
       setError("Please Enter 10 digits");
     } else {
-      const checkPhoneNum = await axios.post('/api/auth/checkPhoneNum',{ phone : num})
-      if (checkPhoneNum.data == 'phoneConfirmed') {
-        localStorage.setItem('forgottPhone',num[0])
-         navigate('/resetForm')
-      } else {
-      //  console.log('This is Not Your Phone Number')
-       setError("This is Not Your Phone Number");
+      
+      try {
+        const checkPhoneNum = await axios.post('/api/auth/checkPhoneNum',{ phone : num})
+        if (checkPhoneNum.data == 'phoneConfirmed') {
+          console.log("phoneConfirmed")
+          localStorage.setItem('forgottPhone',num[0])
+           navigate('/resetForm')
+        }
+      } catch (error) {
+        console.log(error.response.data)
+        setError("This is Not Your Phone Number");
       }
+      
     }
-   
   };
   const [data, setData] = useState({ phoneNum: "" });
   const { phoneNum } = data;

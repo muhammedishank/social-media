@@ -77,7 +77,7 @@ function Login() {
         password: values.password,
       };
       dispatch(login(userData));
-    },
+    }, 
   });
 
   return (
@@ -119,6 +119,7 @@ function Login() {
             console.log(credentialResponse);
           }}    
           onError={() => {
+            toast.error('Login Failed')
             console.log('Login Failed');
           }}
         />

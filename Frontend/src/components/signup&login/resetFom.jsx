@@ -9,11 +9,16 @@ import {
   Divider,
 } from "@mui/material";
 import LockResetIcon from "@mui/icons-material/LockReset";
-import React, { Component, useState } from "react";
+import React, { Component, useEffect, useState } from "react";
 import OTPInput, { ResendOTP } from "otp-input-react";
 import { useFormik } from "formik";
+import { forgottPassword, reset } from "../features/auth/authSlice";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useSelector,useDispatch } from "react-redux";
+import { toast } from "react-toastify";
+import { typographyVariant } from "@mui/system";
+
 
 const validate = async (values) => {
   const errors = {};
@@ -47,7 +52,22 @@ const ResetForm = () => {
   const [OTP, setOTP] = useState("");
   const [open, setOpen] = useState(true);
   const [error, setError] = useState(null);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const forgottPhoneNum = localStorage.getItem("forgottPhone");
+  const { user, isLoading, isError, isSuccess, message } = useSelector(
+    (state) => state.auth
+  );
+  useEffect(() => {
+    if (isError) {
+      toast.error(message);
+    }
+    if (isSuccess || user) {
+      console.log("go to home ");
+      navigate("/");
+    }
+    dispatch(reset());
+  }, [user, isError, isSuccess, message, navigate, dispatch]);
   const formik = useFormik({
     initialValues: {
       email: "",
@@ -61,7 +81,7 @@ const ResetForm = () => {
         password: values.password,
       };
       console.log(resetData);
-      // dispatch(login(resetData));
+       dispatch(forgottPassword(resetData));
     },
   });
 
@@ -71,17 +91,25 @@ const ResetForm = () => {
     //console.log(OTP.length);
     console.log(forgottPhoneNum);
     if (OTP.length === 4) {
-      const inOtpData = await axios.post("/api/auth/otpConfirmation", {
-        phone: forgottPhoneNum,
-        otp: OTP,
-      });
-      console.log(inOtpData);
-      if (inOtpData.data == "otpConfirmed") {
-        await localStorage.removeItem("forgottPhoneNum");
-        setOpen(false);
-      } else {
-        setError("Wrong OTP!, Enter Valid OTP");
+      try {
+        const inOtpData = await axios.post("/api/auth/otpConfirmation", {
+          phone: forgottPhoneNum,
+          otp: OTP,
+        });
+        console.log(inOtpData);
+        if (inOtpData.data == "otpConfirmed") {
+          await localStorage.removeItem("forgottPhone");
+          setOpen(false);
+        } else {
+          setError("Wrong OTP!, Enter Valid OTP");
+        }
+      } catch (error) {
+        if(error.response.data == "confirmationFailed"){
+          setError("Wrong OTP!, Enter Valid OTP");
+
+        }
       }
+      
     } else {
       console.log("Not 4 digit");
     }

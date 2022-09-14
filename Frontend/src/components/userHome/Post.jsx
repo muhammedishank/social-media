@@ -14,12 +14,18 @@ import ShareIcon from "@mui/icons-material/Share";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { Box, Checkbox } from "@mui/material";
 import Favorite from "@mui/icons-material/Favorite";
-import React from 'react'
+import React, { useState } from "react";
 
 const Post = () => {
+  const [like, setLike] = useState(10);
+  const [isliked, setisLiked] = useState(false);
+  const likeHandler = () => {
+    setLike(isliked ? like - 1 : like + 1);
+    setisLiked(!isliked);
+  };
   return (
     <Box>
-        <Card sx={{margin:5}}>
+      <Card sx={{ margin: 5 }}>
         <CardHeader
           avatar={
             <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
@@ -48,7 +54,7 @@ const Post = () => {
           </Typography>
         </CardContent>
         <CardActions disableSpacing>
-          <IconButton aria-label="add to favorites">
+          <IconButton aria-label="add to favorites" onClick={likeHandler}>
             <Checkbox
               icon={<FavoriteBorder />}
               checkedIcon={<Favorite sx={{ color: "red" }} />}
@@ -57,10 +63,11 @@ const Post = () => {
           <IconButton aria-label="share">
             <ShareIcon />
           </IconButton>
+          <span style={{ marginLeft: 15 }}>{like} People like it!</span>
         </CardActions>
-      </Card> 
+      </Card>
     </Box>
-  )
-}
+  );
+};
 
-export default Post
+export default Post;

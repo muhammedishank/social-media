@@ -15,6 +15,7 @@
     "axios": "^0.27.2",
     "formik": "^2.2.9",
     "jwt-decode": "^3.1.2",
+    "mdb-react-ui-kit": "^4.2.0",
     "otp-input-react": "^0.3.0",
     "otp-timer": "^1.1.5",
     "react": "^18.2.0",

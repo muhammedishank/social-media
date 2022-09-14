@@ -3,11 +3,12 @@ import { AppBar, Avatar, Box, InputBase, Toolbar, Typography,styled, Menu, MenuI
 import Pets from "@mui/icons-material/Pets";
 import MailIcon from "@mui/icons-material/Mail";
 import Notifications from "@mui/icons-material/Notifications";
+import Badge from '@mui/material/Badge'
+
  import { ToastContainer, toast } from 'react-toastify';
   import 'react-toastify/dist/ReactToastify.css';
-  import { logout, reset } from "../components/features/auth/authSlice";
+  import { logout, reset } from "../../components/features/auth/authSlice";
 
-import Badge from '@mui/material/Badge'
 import React from "react";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";

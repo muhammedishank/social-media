@@ -1,17 +1,16 @@
-import Home from "./components/Home";
-import Navbar from "./components/Navbar";
-import Rightbar from "./components/Rightbar";
-import Feedbar from "./components/Feed";
+import Home from "./components/userHome/Home";
 import Signup from "./components/signup&login/Signup";
 import Otp from "./components/signup&login/resetFom";
 import Login from "./components/signup&login/Login";
+import Profile from "./components/profile/profile";
 import { Box, createTheme, Stack, ThemeProvider } from "@mui/material";
 import React from "react";
-import Add from "./components/Add";
 import { useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import ResetForm from "./components/signup&login/resetFom";
+import 'mdb-react-ui-kit/dist/css/mdb.min.css'
+
 
 function App() {
   const [mode, setMode] = useState("light");
@@ -29,7 +28,11 @@ function App() {
             <Route exact path="/" element={<Login />} />
             <Route exact path="/otp" element={<Otp />} />
             <Route exact path="/resetForm" element={<ResetForm />} />
-
+            <Route
+              exact
+              path="/userProfile"
+              element={<Profile setMode={setMode} mode={mode} />}
+            />
             <Route
               exact
               path="/userHome"

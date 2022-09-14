@@ -1,10 +1,11 @@
-import Sidebar from "../components/Sidebar";
-import Navbar from "../components/Navbar";
-import Rightbar from "../components/Rightbar";
-import Feedbar from "../components/Feed";
+import Sidebar from "./Sidebar";
+import Navbar from "./Navbar";
+import Rightbar from "./Rightbar";
+import Feedbar from "./Feed";
+import Add from "./Add";
+
 import { Box, createTheme, Stack, ThemeProvider } from "@mui/material";
 import React from "react";
-import Add from "../components/Add";
 import { useState } from "react";
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
