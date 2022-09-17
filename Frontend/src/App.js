@@ -3,13 +3,15 @@ import Signup from "./components/signup&login/Signup";
 import Otp from "./components/signup&login/resetFom";
 import Login from "./components/signup&login/Login";
 import Profile from "./components/profile/profile";
+import AdminHome from "./components/admin/home/AdminHome"
+
 import { Box, createTheme, Stack, ThemeProvider } from "@mui/material";
 import React from "react";
 import { useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import ResetForm from "./components/signup&login/resetFom";
-import 'mdb-react-ui-kit/dist/css/mdb.min.css'
+// import 'mdb-react-ui-kit/dist/css/mdb.min.css'
 
 
 function App() {
@@ -38,6 +40,8 @@ function App() {
               path="/userHome"
               element={<Home setMode={setMode} mode={mode} />}
             />
+           <Route exact path="/AdminHome" element={<AdminHome />} />
+
           </Routes>
         </Box>
       </BrowserRouter>

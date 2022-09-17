@@ -1,12 +1,15 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 const user = JSON.parse(localStorage.getItem("user"));
+const admin = JSON.parse(localStorage.getItem("admin"));
 const initialState = {
   user: user ? user : null,
+  admin: admin ? admin : null,
   isError: false,
   isSuccess: false,
   isLoading: false,
   message: "",
+  isAdmin: false,
 };
 
 export const register = createAsyncThunk(
@@ -32,9 +35,31 @@ export const login = createAsyncThunk(
   async (userData, thunkAPI) => {
     try {
       const response = await axios.post("/api/auth/login", userData);
+      // console.log(response.data);
       if (response.data) {
         localStorage.setItem("user", JSON.stringify(response.data));
+      } 
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response && error.response.data && error.response.data) ||
+        error.message ||
+        error.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+export const AdminLogin = createAsyncThunk(
+  "auth/AdminLogin",
+  async (userData, thunkAPI) => {
+    try {
+      const response = await axios.post("/api/auth/login", userData);
+      console.log(response.data);
+      if (response.data.admin) {
+        localStorage.setItem("admin", JSON.stringify(response.data));
       }
+
       return response.data;
     } catch (error) {
       const message =
@@ -49,15 +74,13 @@ export const forgottPassword = createAsyncThunk(
   "auth/forgottPassword",
   async (userData, thunkAPI) => {
     try {
-      console.log("favas")
+      console.log("favas");
       const response = await axios.put("/api/auth/forgottPassword", userData);
-      console.log(response)
-      // if (response.data) {
-      //   localStorage.setItem("us", JSON.stringify(response.data));
-      // }
+      console.log(response);
+
       return response.data;
     } catch (error) {
-      console.log(error)
+      console.log(error);
       const message =
         (error.response && error.response.data && error.response.data) ||
         error.message ||
@@ -76,7 +99,7 @@ export const logout = createAsyncThunk(
           authorization: `Bearer ${token}`,
         },
       };
-      const { data } = await axios.get("/api/auth/logout",config);
+      const { data } = await axios.get("/api/auth/logout", config);
       if (data.status) localStorage.removeItem("user");
     } catch (error) {
       console.log(error);
@@ -93,11 +116,11 @@ export const authSlice = createSlice({
       state.isSuccess = false;
       state.isError = false;
       state.message = "";
+      state.isAdmin = false;
     },
   },
   extraReducers: (builder) => {
     builder
-
       .addCase(register.pending, (state) => {
         state.isLoading = true;
       })
@@ -142,6 +165,21 @@ export const authSlice = createSlice({
       })
       .addCase(logout.fulfilled, (state) => {
         state.user = null;
+      })
+      .addCase(AdminLogin.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(AdminLogin.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = false;
+        state.admin = action.payload;
+        state.isAdmin = true;
+      })
+      .addCase(AdminLogin.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload;
+        state.admin = null;
       });
   },
 });

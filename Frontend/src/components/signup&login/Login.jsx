@@ -13,13 +13,14 @@ import GoogleIcon from "@mui/icons-material/Google";
 import { useFormik } from "formik";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { login, reset } from "../features/auth/authSlice";
+import { login, reset, AdminLogin } from "../features/auth/authSlice";
 import { toast } from "react-toastify";
 import ForgottForm from "./forgott";
-import { GoogleLogin } from '@react-oauth/google';
+import { GoogleLogin } from "@react-oauth/google";
 import jwt_decode from "jwt-decode";
 
 const validate = (values) => {
+  
   const errors = {};
   if (!values.email) {
     errors.email = "Required";
@@ -45,26 +46,29 @@ function Login() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { user, isLoading, isError, isSuccess, message } = useSelector(
-    (state) => state.auth
-  );
-   
+  const adminEmail = process.env.adminEmail
+  const { user, admin, isAdmin, isLoading, isError, isSuccess, message } =
+    useSelector((state) => state.auth);
+
   useEffect(() => {
     if (isError) {
       toast.error(message);
+    }
+    if (isAdmin) {
+      navigate("/adminHome");
     }
     if (isSuccess || user) {
       navigate("/userHome");
     }
     dispatch(reset());
-  }, [user, isError, isSuccess, message, navigate, dispatch]);
-  const GoogleAuthLogin = (decoded) =>{
+  }, [user, isError, isSuccess, message, isAdmin, navigate, dispatch]);
+  const GoogleAuthLogin = (decoded) => {
     const userData = {
       email: decoded.email,
       password: decoded.sub,
     };
     dispatch(login(userData));
-  }
+  };
   const formik = useFormik({
     initialValues: {
       email: "",
@@ -76,8 +80,9 @@ function Login() {
         email: values.email,
         password: values.password,
       };
-      dispatch(login(userData));
-    }, 
+      if (values.email === adminEmail) dispatch(AdminLogin(userData));
+      else dispatch(login(userData));
+    },
   });
 
   return (
@@ -103,27 +108,27 @@ function Login() {
           <Typography
             variant="h4"
             padding={1}
-            sx={{ color: "#1876d2",mb:2 }}
+            sx={{ color: "#1876d2", mb: 2 }}
             textAlign="center"
           >
             Login
           </Typography>
-         
+
           <GoogleLogin
-          width="large"
-          theme="outline"
-          onSuccess={credentialResponse => {
-           const decoded = jwt_decode(credentialResponse.credential)
-            console.log(decoded)
-            GoogleAuthLogin(decoded)
-            console.log(credentialResponse);
-          }}    
-          onError={() => {
-            toast.error('Login Failed')
-            console.log('Login Failed');
-          }}
-        />
-          
+            width="large"
+            theme="outline"
+            onSuccess={(credentialResponse) => {
+              const decoded = jwt_decode(credentialResponse.credential);
+              console.log(decoded);
+              GoogleAuthLogin(decoded);
+              console.log(credentialResponse);
+            }}
+            onError={() => {
+              toast.error("Login Failed");
+              console.log("Login Failed");
+            }}
+          />
+
           <Divider
             sx={{
               width: { sm: 200, md: 300 },

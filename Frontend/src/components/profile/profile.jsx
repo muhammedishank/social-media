@@ -5,6 +5,7 @@ import Rightbar from "../userHome/Rightbar";
 import Add from "../userHome/Add";
 import ProfileHome from "./profileHome";
 import { Box, createTheme, Stack, ThemeProvider } from "@mui/material";
+// import 'mdb-react-ui-kit/dist/css/mdb.min.css'
 
 
 const profile = ({ mode, setMode }) => {

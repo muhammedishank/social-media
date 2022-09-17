@@ -16,7 +16,7 @@ import Notifications from "@mui/icons-material/Notifications";
 import Badge from "@mui/material/Badge";
 
 import "react-toastify/dist/ReactToastify.css";
-import { logout, reset } from "../../components/features/auth/authSlice";
+import { adminLogout, reset } from "../../../components/features/auth/authSlice";
 
 import React from "react";
 import { useState } from "react";
@@ -67,19 +67,19 @@ const Navbar = () => {
     <AppBar position="sticky">
       <StyledToolbar>
         <Typography variant="h6" sx={{ display: { xs: "none", sm: "block" } }}>
-          ISHAN K
+          ADMIN
         </Typography>
         <Pets sx={{ display: { xs: "block", sm: "none" } }} />
         <Search>
           <InputBase placeholder="Search..."></InputBase>
         </Search>
         <Icons>
-          <Badge badgeContent={4} color="error">
+          {/* <Badge badgeContent={4} color="error">
             <MailIcon />
           </Badge>
           <Badge badgeContent={4} color="error">
             <Notifications />
-          </Badge>
+          </Badge> */}
           <Avatar
             sx={{ width: 30, height: 30 }}
             src="https://avatars.githubusercontent.com/u/102403834?v=4"
@@ -97,7 +97,7 @@ const Navbar = () => {
             sx={{ width: 30, height: 30 }}
             src="https://avatars.githubusercontent.com/u/102403834?v=4"
           />
-          <Typography variant="span">Ishan</Typography>
+          <Typography variant="span">Admin</Typography>
         </Userbox>
       </StyledToolbar>
       <Menu
@@ -116,8 +116,6 @@ const Navbar = () => {
           horizontal: "left",
         }}
       >
-        <MenuItem>Profile</MenuItem>
-        <MenuItem>My account</MenuItem>
         <MenuItem onClick={onLogout}>Logout</MenuItem>
       </Menu>
     </AppBar>

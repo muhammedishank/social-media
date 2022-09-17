@@ -28,19 +28,24 @@ router.put("/:id",protect, async (req, res) => {
 });
 
 // Delete
-router.delete("/:id",protect, async (req, res) => {
-  if (req.body.userId === req.params.id || req.body.isAdmin) {
+router.delete("/:id", async (req, res) => {
     try {
       const user = await User.findByIdAndDelete(req.params.id);
-      res.status(200).json("account deleted");
+      res.status(200).json(req.params.id);
     } catch (err) {
-      res.status(500).json(err);
-    }
-  } else {
-    return res.status(403).json("u can only delete ur account");
-  }
+      res.status(500).json(err);  
+  } 
 });
-
+// get all users
+router.get("/", protect, async (req,res) =>{
+  try {
+    console.log("ghgfhjgf");
+    const users = await User.find();
+    res.status(200).json(users);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+})
 // get a user
 router.get("/:id", protect, async (req, res) => {
   try {
@@ -51,6 +56,30 @@ router.get("/:id", protect, async (req, res) => {
     res.status(500).json(err);
   }
 });
+// block user
+router.put("/block/:id", async (req,res) =>{
+  try {
+    await User.findByIdAndUpdate(req.params.id, {
+      $set: {isBlock :true},
+    });
+    res.status(200).json("user blocked");
+  } catch (error) {
+    res.status(500).json(err);
+    console.log(error);
+  }
+})
+// unBlock user
+router.put("/unBlock/:id", async (req,res) =>{
+  try {
+    await User.findByIdAndUpdate(req.params.id, {
+      $set: {isBlock :false},
+    });
+    res.status(200).json("user Unblocked");
+  } catch (error) {
+    res.status(500).json(err);
+    console.log(error);
+  }
+})
 
 // Follow user
 router.put("/:id/follow", protect, async (req, res) => {
